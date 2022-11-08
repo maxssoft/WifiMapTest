@@ -1,4 +1,4 @@
-package com.maxssoft.wifimaptest.ui.location
+package com.maxssoft.wifimaptest.util.location
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -7,11 +7,12 @@ import android.location.Location
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.maxssoft.wifimaptest.ui.logger.LoggerFactory
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

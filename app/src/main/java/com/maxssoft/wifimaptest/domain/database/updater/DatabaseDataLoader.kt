@@ -14,7 +14,12 @@ interface DatabaseDataLoader {
     fun recreateTable()
 
     /**
+     * Создает индексы на таблицу с данными
+     */
+    fun createIndices()
+
+    /**
      * Вставляет в таблицу wifi точек порцию данных (рекомендуется не более 1000 строк)
      */
-    suspend fun appendRows(data: List<WifiPoint>)
+    fun appendRows(data: List<WifiPoint>)
 }

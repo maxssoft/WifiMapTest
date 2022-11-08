@@ -4,16 +4,21 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.maxssoft.wifimaptest.domain.model.DatabaseUpdateState
 import com.maxssoft.wifimaptest.domain.model.WifiPoint
-import com.maxssoft.wifimaptest.ui.logger.LoggerFactory
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 /**
  * Интерфейс класса, обновляющего базу данных
  *
  * При первом старте загружает в базу данных информацию о точках из транспортного zip-архива, лежащего в ресурсах
+ * Чтение CSV файла с данными происходит лениво через [Sequence]
+ * Вставка данных в базу данных происходит пакетам по 1000 записей
+ *
+ * TODO лучше бы перенести его в WorkManager, чтобы процесс загрузки не зависел от foreground приложения
  *
  * @author Сидоров Максим on 06.11.2022
  */
@@ -35,10 +40,10 @@ interface DatabaseUpdater {
      * TODO здесь в будующем можно сделать и полноценное обновление из доп.архивов,
      * TODO чтобы данные не перезатирались, а именно обновлялись и добавлялись (но в тестовом задании этого нет)
      */
-    suspend fun updateDatabase()
+    fun updateDatabase()
 }
 
-class DatabaseUpdaterImpl(
+class DatabaseUpdaterImpl @Inject constructor(
     loggerFactory: LoggerFactory,
     context: Context,
     private val dataFileExtractor: DataFileExtractor,
@@ -53,7 +58,7 @@ class DatabaseUpdaterImpl(
 
     override fun isHaveUpdates(): Boolean = preferences.wasUpdated
 
-    override suspend fun updateDatabase() = withContext(Dispatchers.IO) {
+    override fun updateDatabase() {
         logger.d { "updateDatabase()" }
 
         preferences.wasUpdated = false
@@ -61,42 +66,76 @@ class DatabaseUpdaterImpl(
 
         try {
             // распаковываем zip файл из ресурсов и получаем для него reader
-            dataFileExtractor.extractDataFile().use { reader ->
-                logger.d { "updateDatabase: zip file extracted" }
-                val recordCount = reader.count
-                var appendedCount = 0
+            val csv = dataFileExtractor.extractDataFile()
+            logger.d { "updateDatabase: zip file extracted" }
+            val recordCount = csv.useLines { it.count() }
+            var appendedCount = 0
 
-                logger.d { "updateDatabase: zip file contains $recordCount record" }
-                _updateState.value = DatabaseUpdateState.Loading(recordCount.percent(appendedCount))
+            logger.d { "updateDatabase: zip file contains $recordCount record" }
+            _updateState.value = DatabaseUpdateState.Loading(recordCount.percent(appendedCount))
 
+            // пересоздаем таблицу для быстрой очистки данных
+            databaseDataLoader.recreateTable()
+
+            // Используем ленивое чтение файла через Sequence
+            csv.useLines { linesSequence ->
+                // Промежуточный буфер для чтения пакета записей,
+                // когда он заполняется, происходит вставка пакета в базу данных
                 val packetRecords = mutableListOf<WifiPoint>()
-                // читаем лениво из Sequence данные по [PACKET_RECORD_COUNT] записей и пакетно вставляем их в базу данных
-                reader.useLines().forEach { wifiPoint ->
-                    packetRecords.add(wifiPoint)
 
-                    if (packetRecords.size >= PACKET_RECORD_COUNT) {
-                        logger.d { "updateDatabase: read $PACKET_RECORD_COUNT records" }
-                        appendToDataBase(packetRecords)
-                        appendedCount += packetRecords.size
-                        logger.d { "updateDatabase: records appended [$appendedCount / $recordCount] to database" }
-
-                        packetRecords.clear()
-                        _updateState.value = DatabaseUpdateState.Loading(recordCount.percent(appendedCount))
+                linesSequence
+                    .drop(1) // пропускаем заголовок
+                    .map { line ->
+                        val fields = line.split(",")
+                        val pointId = runCatching { fields[1].toLong() }.getOrNull()
+                        val latitude = runCatching { fields[2].toDouble() }.getOrNull()
+                        val longitude = runCatching { fields[3].toDouble() }.getOrNull()
+                        if (pointId != null && latitude != null && longitude != null) {
+                            WifiPoint(
+                                pointId = pointId,
+                                latitude = latitude,
+                                longitude = longitude
+                            )
+                        } else {
+                            null
+                        }
                     }
-                }
-                appendToDataBase(packetRecords)
+                    .forEach { wifiPoint ->
+                        if (wifiPoint != null) {
+                            packetRecords.add(wifiPoint)
 
-                logger.d { "updateDatabase: update process finished" }
-                _updateState.value = DatabaseUpdateState.Done
-                preferences.wasUpdated = true
+                            // Вставляем прочитанную порцию строк в базу данных
+                            if (packetRecords.size >= PACKET_RECORD_COUNT) {
+                                logger.d { "updateDatabase: read $PACKET_RECORD_COUNT records" }
+                                appendToDataBase(packetRecords)
+                                appendedCount += packetRecords.size
+                                logger.d { "updateDatabase: records appended [$appendedCount / $recordCount] to database" }
+
+                                packetRecords.clear()
+                                _updateState.value = DatabaseUpdateState.Loading(recordCount.percent(appendedCount))
+                            }
+                        }
+                    }
+                appendToDataBase(packetRecords)
             }
+
+            preferences.wasUpdated = true
+            // На всякий случай принудитеьно удаляем временный файл с данными
+            csv.delete()
+
+            // создаем индексы отдельно, в конце, чтобы они не тормозили вставку данных
+            _updateState.value = DatabaseUpdateState.Indexing
+            databaseDataLoader.createIndices()
+
+            logger.d { "updateDatabase: update process finished" }
+            _updateState.value = DatabaseUpdateState.Done
         } catch (exception: Exception) {
             logger.e(exception) { "updateDatabase: error of update process" }
             _updateState.value = DatabaseUpdateState.UpdateFailed(exception)
         }
     }
 
-    private suspend fun appendToDataBase(records: List<WifiPoint>) {
+    private fun appendToDataBase(records: List<WifiPoint>) {
         logger.d { "appendToDataBase(), ${records.size} records" }
         if (records.isEmpty()) {
             return

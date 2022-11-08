@@ -1,7 +1,7 @@
-package com.maxssoft.wifimaptest.ui.location
+package com.maxssoft.wifimaptest.util.location
 
 import androidx.appcompat.app.AppCompatActivity
-import com.maxssoft.wifimaptest.ui.logger.LoggerFactory
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import javax.inject.Inject
 
 /**

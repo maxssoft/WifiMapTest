@@ -1,8 +1,8 @@
 package com.maxssoft.wifimaptest.di.platform
 
 import com.maxssoft.wifimaptest.di.ApplicationModule
-import com.maxssoft.wifimaptest.ui.location.LocationHelperFactory
-import com.maxssoft.wifimaptest.ui.location.LocationHelperFactoryImpl
+import com.maxssoft.wifimaptest.util.location.LocationHelperFactory
+import com.maxssoft.wifimaptest.util.location.LocationHelperFactoryImpl
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton

@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">WiFiMapTest</string>
-    <string name="title_activity_maps">MapsActivity</string>
+    <string name="app_title">Тестовое задание для WifiMap</string>
+
+    <string name="database_update">Обновление базы данных...</string>
+    <string name="database_update_unpacking">Распкаковка архива с данными</string>
+    <string name="database_update_loading">Загрузка списка wifi точек в базу данных</string>
+    <string name="database_update_indexing">Создание индексов</string>
+
+    <string name="points_error_fragment_label">Ошибка</string>
+    <string name="points_error_title">Упс, что то пошло не так(</string>
+    <string name="points_error_details">Подробнее</string>
 </resources>

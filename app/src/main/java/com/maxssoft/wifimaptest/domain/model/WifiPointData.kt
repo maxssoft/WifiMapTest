@@ -5,4 +5,4 @@ package com.maxssoft.wifimaptest.domain.model
  *
  * @author Сидоров Максим on 06.11.2022
  */
-data class WifiPoint(val id: Long, val pointId: Long, val latitude: Double, val longitude: Double)
+data class WifiPoint(val pointId: Long, val latitude: Double, val longitude: Double)

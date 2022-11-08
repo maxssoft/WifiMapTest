@@ -30,9 +30,10 @@
              "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
         -->
         <activity
-            android:name=".ui.MapsActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
-            android:label="@string/title_activity_maps">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.WiFiMapTest.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

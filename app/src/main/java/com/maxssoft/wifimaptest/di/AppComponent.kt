@@ -1,9 +1,12 @@
 package com.maxssoft.wifimaptest.di
 
 import com.maxssoft.wifimaptest.app.WifiMapTestApplication
-import com.maxssoft.wifimaptest.di.activity.MapsActivityModule
+import com.maxssoft.wifimaptest.di.ui.UiModule
 import com.maxssoft.wifimaptest.di.database.DatabaseModule
 import com.maxssoft.wifimaptest.di.platform.PlatformModule
+import com.maxssoft.wifimaptest.di.viewmodel.ViewModelModule
+import com.maxssoft.wifimaptest.ui.splash.SplashScreenViewModel
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import dagger.Component
 import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
@@ -22,6 +25,12 @@ import javax.inject.Singleton
     ApplicationModule::class,
     PlatformModule::class,
     DatabaseModule::class,
-    MapsActivityModule::class,
+    UiModule::class,
+    ViewModelModule::class,
 ])
-interface AppComponent : AndroidInjector<WifiMapTestApplication>
+interface AppComponent : AndroidInjector<WifiMapTestApplication> {
+
+    fun loggerFactory(): LoggerFactory
+
+    fun splashScreenViewModel(): SplashScreenViewModel
+}

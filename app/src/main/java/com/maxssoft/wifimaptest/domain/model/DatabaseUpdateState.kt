@@ -26,6 +26,11 @@ sealed class DatabaseUpdateState {
     data class Loading(val percent: Int) : DatabaseUpdateState()
 
     /**
+     * Индексация даных
+     */
+    object Indexing : DatabaseUpdateState()
+
+    /**
      * Обновление завершено успешно
      */
     object Done : DatabaseUpdateState()

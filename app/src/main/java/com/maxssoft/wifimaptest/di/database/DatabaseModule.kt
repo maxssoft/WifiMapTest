@@ -1,9 +1,6 @@
 package com.maxssoft.wifimaptest.di.database
 
-import com.maxssoft.wifimaptest.data.database.DatabaseHelper
 import com.maxssoft.wifimaptest.data.database.updater.DataFileExtractorImpl
-import com.maxssoft.wifimaptest.data.database.updater.DataFileReaderFactory
-import com.maxssoft.wifimaptest.data.database.updater.DataFileReaderFactoryImpl
 import com.maxssoft.wifimaptest.data.database.updater.DatabaseDataLoaderImpl
 import com.maxssoft.wifimaptest.di.ApplicationModule
 import com.maxssoft.wifimaptest.domain.database.updater.DataFileExtractor
@@ -27,17 +24,8 @@ interface DatabaseModule {
 
     @Binds
     @Singleton
-    fun bindDataFileReaderFactory(implClass: DataFileReaderFactoryImpl): DataFileReaderFactory
-
-    @Binds
-    @Singleton
-    fun bindDatabaseHelper(implClass: DatabaseHelper): DatabaseHelper
-
-    @Binds
-    @Singleton
     fun bindDatabaseDataLoader(implClass: DatabaseDataLoaderImpl): DatabaseDataLoader
 
     @Binds
-    @Singleton
     fun bindDatabaseUpdater(implClass: DatabaseUpdaterImpl): DatabaseUpdater
 }

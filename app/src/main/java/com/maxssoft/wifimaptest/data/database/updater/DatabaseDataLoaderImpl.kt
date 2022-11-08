@@ -4,9 +4,14 @@ import android.database.sqlite.SQLiteStatement
 import com.maxssoft.wifimaptest.data.database.DatabaseHelper
 import com.maxssoft.wifimaptest.domain.database.updater.DatabaseDataLoader
 import com.maxssoft.wifimaptest.domain.model.WifiPoint
-import com.maxssoft.wifimaptest.ui.logger.LoggerFactory
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import javax.inject.Inject
 
+/**
+ * Загрузчик данных в базу данных
+ * Использует быструю пакетную загрузку данных в рамках одной транзакции
+ * Использует прекомпилированную sql команду для исключения потерь на преобразование строк
+ */
 class DatabaseDataLoaderImpl @Inject constructor(
     loggerFactory: LoggerFactory,
     private val databaseHelper: DatabaseHelper,
@@ -17,7 +22,11 @@ class DatabaseDataLoaderImpl @Inject constructor(
         databaseHelper.writableDatabase.use { db -> databaseHelper.recreateWifiTable(db) }
     }
 
-    override suspend fun appendRows(data: List<WifiPoint>) {
+    override fun createIndices() {
+        databaseHelper.writableDatabase.use { db -> databaseHelper.createWifiTableIndices(db) }
+    }
+
+    override fun appendRows(data: List<WifiPoint>) {
         logger.d { "appendRows()" }
 
         databaseHelper.writableDatabase.use { db ->
@@ -32,9 +41,9 @@ class DatabaseDataLoaderImpl @Inject constructor(
             logger.d { "appendRows: beginTransaction()" }
 
             data.forEach { wifiPoint ->
-                sqlCommand.bindLong(0, wifiPoint.pointId)
-                sqlCommand.bindDouble(1, wifiPoint.latitude)
-                sqlCommand.bindDouble(2, wifiPoint.longitude)
+                sqlCommand.bindLong(1, wifiPoint.pointId)
+                sqlCommand.bindDouble(2, wifiPoint.latitude)
+                sqlCommand.bindDouble(3, wifiPoint.longitude)
                 sqlCommand.executeInsert()
                 sqlCommand.clearBindings()
             }

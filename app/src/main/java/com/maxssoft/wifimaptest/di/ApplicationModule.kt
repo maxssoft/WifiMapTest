@@ -1,7 +1,7 @@
 package com.maxssoft.wifimaptest.di
 
 import android.content.Context
-import com.maxssoft.wifimaptest.ui.logger.LoggerFactory
+import com.maxssoft.wifimaptest.util.logger.LoggerFactory
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

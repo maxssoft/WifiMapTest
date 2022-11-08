@@ -1,5 +1,6 @@
 package com.maxssoft.wifimaptest.util
 
+import android.util.Log
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -34,11 +35,13 @@ fun unzip(zipFile: File, destDirectory: File) {
 @Throws(IOException::class)
 fun unzip(zipInputStream: InputStream, destDirectory: File) {
     if (!destDirectory.exists()) {
+        Log.d("zip", "unzip: destDirectory not exists")
         destDirectory.mkdirs()
     }
     ZipInputStream(zipInputStream).use { zis ->
         var zipEntry = zis.nextEntry
         while (zipEntry != null) {
+            Log.d("zip", "name = ${zipEntry.name}, isDirectory = ${zipEntry.isDirectory}")
             val entryFile = File(destDirectory, zipEntry.name)
             if (zipEntry.isDirectory) {
                 entryFile.mkdir()
@@ -51,10 +54,25 @@ fun unzip(zipInputStream: InputStream, destDirectory: File) {
 }
 
 @Throws(IOException::class)
+fun unzipFile(zipInputStream: InputStream, filename: String, destFile: File) {
+    ZipInputStream(zipInputStream).use { zis ->
+        var zipEntry = zis.nextEntry
+        while (zipEntry != null) {
+            Log.d("zip", "name = ${zipEntry.name}, isDirectory = ${zipEntry.isDirectory}")
+            if (zipEntry.name.equals(filename)) {
+                extractFile(zis, destFile)
+            }
+            zipEntry = zis.nextEntry
+        }
+    }
+}
+
+@Throws(IOException::class)
 private fun extractFile(inputStream: InputStream, destFile: File) {
+    Log.d("zip", "extractFile: destFile = $destFile")
     BufferedOutputStream(FileOutputStream(destFile)).use { bos ->
         val bytesIn = ByteArray(BUFFER_SIZE)
-        var read: Int
+        var read = 0
         while (inputStream.read(bytesIn).also { read = it } != -1) {
             bos.write(bytesIn, 0, read)
         }

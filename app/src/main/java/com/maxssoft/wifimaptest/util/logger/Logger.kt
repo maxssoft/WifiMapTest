@@ -1,4 +1,4 @@
-package com.maxssoft.wifimaptest.ui.logger
+package com.maxssoft.wifimaptest.util.logger
 
 import android.util.Log
 
@@ -15,6 +15,7 @@ interface Logger {
     fun e(exception: Exception?, block: () -> String)
 }
 
+@Suppress("OVERRIDE_BY_INLINE")
 class SimpleLogger(val tag: String) : Logger {
 
     override inline fun d(block: () -> String) {
