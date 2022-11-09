@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/space_32"
-        android:layout_marginBottom="@dimen/space_8"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:gravity="center_horizontal"
         app:layout_constraintStart_toStartOf="parent"

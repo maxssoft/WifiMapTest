@@ -10,4 +10,10 @@
     <string name="points_error_fragment_label">Ошибка</string>
     <string name="points_error_title">Упс, что то пошло не так(</string>
     <string name="points_error_details">Подробнее</string>
+
+    <string name="rg_algorithm">Алгоритм</string>
+    <string name="rb_sql">SQL</string>
+    <string name="rb_sql_combo">Combo</string>
+    <string name="rb_standard">Google</string>
+
 </resources>

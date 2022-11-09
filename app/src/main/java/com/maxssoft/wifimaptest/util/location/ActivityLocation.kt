@@ -16,6 +16,11 @@ interface ActivityLocation {
     val locationFlow: Flow<Location>
 
     /**
+     * Есть разрешение на геолокацию
+     */
+    val hasPermissions: Boolean
+
+    /**
      * Запрос геолокации, результат вернется через флоу [locationFlow]
      */
     fun requestLocation()

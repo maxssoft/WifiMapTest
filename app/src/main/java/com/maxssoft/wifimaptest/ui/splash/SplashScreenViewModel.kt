@@ -28,16 +28,27 @@ class SplashScreenViewModel @Inject constructor(
     private val _screenState = MutableStateFlow<SplashScreenState>(SplashScreenState.None)
     val screenState: StateFlow<SplashScreenState> = _screenState
 
-    init {
-        logger.d { "onStart()" }
-        _screenState.value = SplashScreenState.None
+    /**
+     * Событие создания вьюшки
+     */
+    fun onViewCreated() {
+        logger.d { "onViewCreated()" }
+        // Запускаем проверку обновления данных только при первом старте вьюшки
+        if (_screenState.value == SplashScreenState.None) {
+            startCheckUpdate()
+        }
+    }
 
+    private fun startCheckUpdate() {
+        logger.d { "startCheckUpdate()" }
         viewModelScope.launch(Dispatchers.IO) {
             if (databaseUpdater.isHaveUpdates()) {
                 logger.d { "databaseUpdater.isHaveUpdates() == true, start database update" }
+                // подписываемся на изменение состояния обновления базы данных
                 databaseUpdater.updateState
                     .onEach(::handleUpdaterState)
                     .launchIn(this)
+
                 databaseUpdater.updateDatabase()
             } else {
                 logger.d { "databaseUpdater.isHaveUpdates() == false" }

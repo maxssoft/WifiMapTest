@@ -12,8 +12,5 @@ import dagger.Module
  */
 @Module(includes = [ApplicationModule::class])
 interface ViewModelModule {
-/*
-    @Binds
-    fun splashScreenViewModel(implClass: SplashScreenViewModel): SplashScreenViewModel
-*/
+
 }

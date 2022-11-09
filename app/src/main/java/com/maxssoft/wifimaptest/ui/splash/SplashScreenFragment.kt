@@ -47,6 +47,8 @@ class SplashScreenFragment : DaggerFragment() {
             .onEach(::handleViewState)
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
             .launchIn(viewLifecycleOwner.lifecycleScope)
+
+        viewModel.onViewCreated()
     }
 
     private fun handleViewState(viewState: SplashScreenState) {

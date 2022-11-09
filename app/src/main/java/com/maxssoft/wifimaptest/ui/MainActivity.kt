@@ -26,7 +26,7 @@ class MainActivity : DaggerAppCompatActivity(), ActivityLocation {
     @Inject
     lateinit var locationHelperFactory: LocationHelperFactory
 
-    private val logger by lazy { appComponent().loggerFactory().get("MapsActivity") }
+    private val logger by lazy { appComponent().loggerFactory().get("MainActivity") }
     private val locationHelper: ActivityLocationHelper by lazy { locationHelperFactory.locationHelper(this) }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -65,6 +65,8 @@ class MainActivity : DaggerAppCompatActivity(), ActivityLocation {
     }
 
     override val locationFlow: Flow<Location> get() = locationHelper.locationFlow
+    override val hasPermissions: Boolean
+        get() = locationHelper.hasPermissions()
 
     override fun requestLocation() {
         locationHelper.requestLocation()
